@@ -32,15 +32,23 @@ public class Generator {
 	}
 
 	public static void main(String... args) throws CharacterCodingException {
-		Charset[] charsets = getCharsets(args);
-		TreeMap<Long, Mapping> conversionTable = new TreeMap<Long, Mapping>();
-		
-		for (Charset charset : charsets) {
-			addMapping(conversionTable, charset);
+		if (args.length > 0) {
+			Charset[] charsets = getCharsets(args);
+			TreeMap<Long, Mapping> conversionTable = new TreeMap<Long, Mapping>();
+			
+			for (Charset charset : charsets) {
+				addMapping(conversionTable, charset);
+			}
+			
+			printTestReport(conversionTable);
+			printData(conversionTable);
+		} else {
+			printUsage();
 		}
-		
-		printTestReport(conversionTable);
-		printData(conversionTable);
+	}
+
+	private static void printUsage() {
+		System.out.println("Usage: java -jar i18n-char-map-generator.jar <charset names as cpXXXX>");
 	}
 
 	private static void printData(TreeMap<Long, Mapping> conversionTable) {
@@ -100,7 +108,11 @@ public class Generator {
 		int index = 0;
 		
 		for (String charsetKey : args) {
-			charsets[index++] = Charset.forName(charsetKey);
+			if (charsetKey.matches("cp\\d{4}")) {
+				charsets[index++] = Charset.forName(charsetKey);
+			} else {
+				throw new IllegalArgumentException("Code page " + charsetKey + " does not match pattern 'cpXXXX'");
+			}
 		}
 
 		return charsets;
